@@ -21,13 +21,13 @@ class CompactSlider(
     ((value - min) / (max - min)).toDouble()
 ) {
 
-    private val TRACK_BG = 0xFF3A3A3A.toInt()
-    private val TRACK_FILL = 0xFFFFFFFF.toInt()
-    private val HANDLE = 0xFFFFFFFF.toInt()
-    private val TEXT = 0xFFE0E0E0.toInt()
-    private val TEXT_DIM = 0xFFA0A0A0.toInt()
-    private val RESET_BTN = 0xFF3A3A3A.toInt()
-    private val RESET_HOVER = 0xFF505050.toInt()
+    private val TRACK_BG = 0xFF2A2D32.toInt()
+    private val TRACK_FILL = 0xFF5AC8FA.toInt()
+    private val HANDLE = 0xFF5AC8FA.toInt()
+    private val TEXT = 0xFFF5F5F7.toInt()
+    private val TEXT_DIM = 0xFF9EA3AA.toInt()
+    private val RESET_BTN = 0xFF22252A.toInt()
+    private val RESET_HOVER = 0xFF2E3239.toInt()
 
     private var currentValue = value
     private val resetBtnSize = 18
