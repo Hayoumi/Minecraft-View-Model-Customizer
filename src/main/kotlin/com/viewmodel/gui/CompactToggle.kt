@@ -13,11 +13,11 @@ class CompactToggle(
     (button as? CompactToggle)?.toggle()
 }, DEFAULT_NARRATION_SUPPLIER) {
 
-    // Черно-бело-серая палитра
-    private val TOGGLE_OFF = 0xFF3A3A3A.toInt()
-    private val TOGGLE_ON = 0xFFFFFFFF.toInt()
-    private val HANDLE = 0xFF0F0F0F.toInt()
-    private val TEXT = 0xFFE0E0E0.toInt()
+    // Мягкая палитра
+    private val TOGGLE_OFF = 0xFF22252A.toInt()
+    private val TOGGLE_ON = 0xFF5AC8FA.toInt()
+    private val HANDLE = 0xFFF5F5F7.toInt()
+    private val TEXT = 0xFFF5F5F7.toInt()
 
     private var progress = if (enabled) 1f else 0f
     private val defaultValue = enabled

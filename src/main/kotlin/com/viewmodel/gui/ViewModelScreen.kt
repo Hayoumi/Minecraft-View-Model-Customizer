@@ -16,32 +16,40 @@ class ViewModelScreen : Screen(Text.empty()) {
         fun contains(mx: Int, my: Int): Boolean = contains(mx.toDouble(), my.toDouble())
     }
 
+    private data class SectionHeader(val title: String, val y: Int)
+
     private val sliders = mutableListOf<CompactSlider>()
     private val toggles = mutableListOf<CompactToggle>()
     private val buttons = mutableListOf<CompactButton>()
 
     // Палитра
-    private val PANEL = 0xFF1A1A1A.toInt()
-    private val CARD = 0xFF252525.toInt()
-    private val ACCENT = 0xFFFFFFFF.toInt()
-    private val TEXT = 0xFFE0E0E0.toInt()
-    private val TEXT_DIM = 0xFF808080.toInt()
-    private val BORDER = 0xFF3A3A3A.toInt()
+    private val PANEL = 0xF0121214.toInt()
+    private val CARD = 0xF0181A1D.toInt()
+    private val ACCENT = 0xFF5AC8FA.toInt()
+    private val TEXT = 0xFFF5F5F7.toInt()
+    private val TEXT_DIM = 0xFF9EA3AA.toInt()
+    private val BORDER = 0xFF2A2D32.toInt()
+    private val BORDER_SOFT = 0x402A2D32
 
     companion object {
-        const val WIDTH = 300
+        const val WIDTH = 312
         const val ITEM_H = 24
         const val SPACING = 4
         const val PADDING = 12
         const val CONFIG_WIDTH = 170
         const val PANEL_GAP = 16
         const val LIST_ITEM_H = 18
-        const val HEADER_SPACING = 34
+        const val HEADER_SPACING = 40
+        const val RADIUS = 8
+        const val SECTION_LABEL_OFFSET = 14
+        const val SECTION_GAP = 14
     }
 
     private lateinit var nameField: ConfigTextFieldWidget
     private var currentName = ""
     private var allConfigs: List<String> = emptyList()
+
+    private val sectionHeaders = mutableListOf<SectionHeader>()
 
     private var contentStartY = 0
     private var panelX = 0
@@ -61,6 +69,7 @@ class ViewModelScreen : Screen(Text.empty()) {
         sliders.clear()
         toggles.clear()
         buttons.clear()
+        sectionHeaders.clear()
         configMenuOpen = false
         dropdownItems = emptyList()
 
@@ -74,16 +83,16 @@ class ViewModelScreen : Screen(Text.empty()) {
 
         var y = contentStartY
 
-        // Size
+        addSectionHeader("Transform", y - SECTION_LABEL_OFFSET)
         y += addSlider(
             panelX, y, "Size",
             ViewModelConfig.current.size, 0.1f, 3.0f, 1.0f,
             { ViewModelConfig.current.size = it; ViewModelConfigManager.saveCurrent() },
             { ViewModelConfig.current.size = 1.0f; ViewModelConfigManager.saveCurrent() }
         )
+        y += SECTION_GAP
 
-        // Position
-        y += addSeparator(y, "Position")
+        addSectionHeader("Position", y - SECTION_LABEL_OFFSET)
         y += addSlider(
             panelX, y, "X",
             ViewModelConfig.current.positionX, -100f, 100f, 0f,
@@ -102,9 +111,9 @@ class ViewModelScreen : Screen(Text.empty()) {
             { ViewModelConfig.current.positionZ = it; ViewModelConfigManager.saveCurrent() },
             { ViewModelConfig.current.positionZ = 0f; ViewModelConfigManager.saveCurrent() }
         )
+        y += SECTION_GAP
 
-        // Rotation
-        y += addSeparator(y, "Rotation")
+        addSectionHeader("Rotation", y - SECTION_LABEL_OFFSET)
         y += addSlider(
             panelX, y, "Yaw",
             ViewModelConfig.current.rotationYaw, -180f, 180f, 0f,
@@ -123,9 +132,9 @@ class ViewModelScreen : Screen(Text.empty()) {
             { ViewModelConfig.current.rotationRoll = it; ViewModelConfigManager.saveCurrent() },
             { ViewModelConfig.current.rotationRoll = 0f; ViewModelConfigManager.saveCurrent() }
         )
+        y += SECTION_GAP
 
-        // Animation
-        y += addSeparator(y, "Animation")
+        addSectionHeader("Animation", y - SECTION_LABEL_OFFSET)
         y += addToggle(
             panelX, y, "Scale Swing",
             ViewModelConfig.current.scaleSwing
@@ -137,7 +146,7 @@ class ViewModelScreen : Screen(Text.empty()) {
 
         val contentBottom = (sliders.map { it.y + it.height } + toggles.map { it.y + it.height })
             .maxOrNull() ?: contentStartY
-        panelHeight = (contentBottom - panelTop) + PADDING + 8
+        panelHeight = (contentBottom - panelTop) + PADDING + 12
 
         setupConfigControls(startX)
 
@@ -189,10 +198,8 @@ class ViewModelScreen : Screen(Text.empty()) {
         return ITEM_H + SPACING
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    private fun addSeparator(y: Int, title: String): Int {
-        // просто сдвигаем Y, сами секции рисуем в render()
-        return 14
+    private fun addSectionHeader(title: String, y: Int) {
+        sectionHeaders.add(SectionHeader(title, y))
     }
 
     private fun setupConfigControls(configX: Int) {
@@ -289,8 +296,8 @@ class ViewModelScreen : Screen(Text.empty()) {
 
     private fun renderPanel(context: DrawContext) {
         val panelBottom = panelTop + panelHeight
-        context.fill(panelX, panelTop, panelX + WIDTH, panelBottom, PANEL)
-        drawBorder(context, panelX, panelTop, WIDTH, panelHeight)
+        fillRoundedRect(context, panelX, panelTop, WIDTH, panelHeight, RADIUS, PANEL)
+        drawRoundedBorder(context, panelX, panelTop, WIDTH, panelHeight, RADIUS, BORDER)
 
         val title = Text.literal("ViewModel").styled { it.withBold(true) }
         val titleY = panelTop + 10
@@ -303,31 +310,21 @@ class ViewModelScreen : Screen(Text.empty()) {
             false
         )
 
-        context.fill(panelX + PADDING, titleY + 12, panelX + WIDTH - PADDING, titleY + 13, BORDER)
+        context.fill(panelX + PADDING, titleY + 12, panelX + WIDTH - PADDING, titleY + 13, BORDER_SOFT)
 
-        var sectionY = contentStartY
-        sectionY = renderSectionTitle(context, panelX, sectionY, "Transform")
-        sectionY += ITEM_H + SPACING
-
-        sectionY = renderSectionTitle(context, panelX, sectionY, "Position")
-        sectionY += (ITEM_H + SPACING) * 3
-
-        sectionY = renderSectionTitle(context, panelX, sectionY, "Rotation")
-        sectionY += (ITEM_H + SPACING) * 3
-
-        renderSectionTitle(context, panelX, sectionY, "Animation")
+        sectionHeaders.forEach { renderSectionTitle(context, panelX, it.y, it.title) }
     }
 
     private fun renderConfigCard(context: DrawContext, mouseX: Int, mouseY: Int) {
-        context.fill(configBox.x, configBox.y, configBox.x + configBox.w, configBox.y + configBox.h, CARD)
-        drawBorder(context, configBox.x, configBox.y, configBox.w, configBox.h)
+        fillRoundedRect(context, configBox.x, configBox.y, configBox.w, configBox.h, RADIUS, CARD)
+        drawRoundedBorder(context, configBox.x, configBox.y, configBox.w, configBox.h, RADIUS, BORDER)
 
         context.drawText(
             textRenderer,
             Text.literal("Config").styled { it.withBold(true) },
-            configBox.x + 10,
+            configBox.x + 14,
             configBox.y + 6,
-            TEXT_DIM,
+            ACCENT,
             false
         )
 
@@ -353,17 +350,17 @@ class ViewModelScreen : Screen(Text.empty()) {
     }
 
     private fun renderDropdown(context: DrawContext, mouseX: Int, mouseY: Int) {
-        val listX = dropdownBounds.x
         val width = dropdownBounds.w
+        val listX = (configBox.x - width - 10).takeIf { it > 12 } ?: (configBox.x + configBox.w + 10)
+        val bgTop = dropdownBounds.y + dropdownBounds.h + 6
         val totalHeight = if (allConfigs.isNotEmpty()) allConfigs.size * (LIST_ITEM_H + 2) - 2 else 0
         if (totalHeight > 0) {
-            val bgTop = dropdownBounds.y + dropdownBounds.h + 2
             val bgHeight = totalHeight + 4
-            context.fill(listX, bgTop, listX + width, bgTop + bgHeight, CARD)
-            drawBorder(context, listX, bgTop, width, bgHeight)
+            fillRoundedRect(context, listX, bgTop, width, bgHeight, RADIUS, CARD)
+            drawRoundedBorder(context, listX, bgTop, width, bgHeight, RADIUS, BORDER)
         }
 
-        var listY = dropdownBounds.y + dropdownBounds.h + 4
+        var listY = bgTop + 2
         val items = mutableListOf<Pair<String, Bounds>>()
 
         allConfigs.forEach { config ->
@@ -374,27 +371,27 @@ class ViewModelScreen : Screen(Text.empty()) {
             listY += LIST_ITEM_H + 2
         }
 
-        dropdownMenuBounds = Bounds(listX, dropdownBounds.y + dropdownBounds.h + 4, width, max(0, totalHeight))
+        dropdownMenuBounds = Bounds(listX, bgTop, width, max(0, totalHeight))
         dropdownItems = items
     }
 
     private fun drawButtonLike(context: DrawContext, bounds: Bounds, label: String, hovered: Boolean, selected: Boolean) {
         val fillColor = when {
             hovered -> ACCENT
-            selected -> 0xFF2F2F2F.toInt()
+            selected -> 0xFF22252A.toInt()
             else -> CARD
         }
-        val textColor = if (hovered) 0xFF000000.toInt() else TEXT
+        val textColor = if (hovered) 0xFF0A0A0A.toInt() else TEXT
 
-        context.fill(bounds.x, bounds.y, bounds.x + bounds.w, bounds.y + bounds.h, fillColor)
-        drawBorder(context, bounds.x, bounds.y, bounds.w, bounds.h)
+        fillRoundedRect(context, bounds.x, bounds.y, bounds.w, bounds.h, RADIUS - 2, fillColor)
+        drawRoundedBorder(context, bounds.x, bounds.y, bounds.w, bounds.h, RADIUS - 2, BORDER)
 
         val tx = bounds.x + (bounds.w - textRenderer.getWidth(label)) / 2
         val ty = bounds.y + (bounds.h - 8) / 2
         context.drawText(textRenderer, Text.literal(label), tx, ty, textColor, false)
     }
 
-    private fun renderSectionTitle(context: DrawContext, x: Int, y: Int, title: String): Int {
+    private fun renderSectionTitle(context: DrawContext, x: Int, y: Int, title: String) {
         context.drawText(
             textRenderer,
             Text.literal(title).styled { it.withBold(true) },
@@ -403,7 +400,6 @@ class ViewModelScreen : Screen(Text.empty()) {
             TEXT_DIM,
             false
         )
-        return y + 12
     }
 
     private fun renderResetButton(context: DrawContext, mouseX: Int, mouseY: Int) {
@@ -418,8 +414,8 @@ class ViewModelScreen : Screen(Text.empty()) {
         val btnColor = if (hovered) ACCENT else CARD
         val textColor = if (hovered) 0xFF000000.toInt() else TEXT
 
-        context.fill(btnX, btnY, btnX + btnW, btnY + btnH, btnColor)
-        drawBorder(context, btnX, btnY, btnW, btnH)
+        fillRoundedRect(context, btnX, btnY, btnW, btnH, RADIUS, btnColor)
+        drawRoundedBorder(context, btnX, btnY, btnW, btnH, RADIUS, BORDER)
 
         context.drawText(
             textRenderer,
@@ -431,11 +427,55 @@ class ViewModelScreen : Screen(Text.empty()) {
         )
     }
 
-    private fun drawBorder(context: DrawContext, x: Int, y: Int, w: Int, h: Int) {
-        context.fill(x, y, x + w, y + 1, BORDER)
-        context.fill(x, y + h - 1, x + w, y + h, BORDER)
-        context.fill(x, y, x + 1, y + h, BORDER)
-        context.fill(x + w - 1, y, x + w, y + h, BORDER)
+    private fun fillRoundedRect(context: DrawContext, x: Int, y: Int, w: Int, h: Int, radius: Int, color: Int) {
+        val r = radius.coerceAtMost(minOf(w, h) / 2)
+        context.fill(x + r, y, x + w - r, y + h, color)
+        context.fill(x, y + r, x + r, y + h - r, color)
+        context.fill(x + w - r, y + r, x + w, y + h - r, color)
+
+        carveCorner(context, x, y, r, color, true, true)
+        carveCorner(context, x + w - r, y, r, color, false, true)
+        carveCorner(context, x, y + h - r, r, color, true, false)
+        carveCorner(context, x + w - r, y + h - r, r, color, false, false)
+    }
+
+    private fun drawRoundedBorder(context: DrawContext, x: Int, y: Int, w: Int, h: Int, radius: Int, color: Int) {
+        val r = radius.coerceAtMost(minOf(w, h) / 2)
+
+        context.fill(x + r, y, x + w - r, y + 1, color)
+        context.fill(x + r, y + h - 1, x + w - r, y + h, color)
+        context.fill(x, y + r, x + 1, y + h - r, color)
+        context.fill(x + w - 1, y + r, x + w, y + h - r, color)
+
+        carveCorner(context, x, y, r, color, true, true, borderOnly = true)
+        carveCorner(context, x + w - r, y, r, color, false, true, borderOnly = true)
+        carveCorner(context, x, y + h - r, r, color, true, false, borderOnly = true)
+        carveCorner(context, x + w - r, y + h - r, r, color, false, false, borderOnly = true)
+    }
+
+    private fun carveCorner(
+        context: DrawContext,
+        originX: Int,
+        originY: Int,
+        radius: Int,
+        color: Int,
+        left: Boolean,
+        top: Boolean,
+        borderOnly: Boolean = false
+    ) {
+        for (i in 0 until radius) {
+            val offset = radius - i
+            val startX = if (left) originX else originX + i
+            val endX = if (left) originX + offset else originX + radius
+            val y = if (top) originY + i else originY + radius - i - 1
+
+            if (!borderOnly) {
+                context.fill(startX, y, endX, y + 1, color)
+            }
+
+            context.fill(startX, y, startX + 1, y + 1, color)
+            context.fill(endX - 1, y, endX, y + 1, color)
+        }
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {

@@ -13,6 +13,7 @@ object ViewModelConfigManager {
 
     private val configsDir = File("config/viewmodel/configs")
     private val activeFile = File("config/viewmodel/active.txt")
+    private val legacyFile = File("config/viewmodel.json")
     private const val DEFAULT_NAME = "Default"
 
     private var configs: MutableMap<String, ViewModelConfig> = mutableMapOf()
@@ -33,6 +34,8 @@ object ViewModelConfigManager {
                 .onSuccess { configs[file.nameWithoutExtension] = it }
                 .onFailure { println("[ViewModel] Failed to load config ${file.nameWithoutExtension}: ${it.message}") }
         }
+
+        importLegacyIfMissing()
 
         ensureDefaultExists()
 
@@ -123,6 +126,18 @@ object ViewModelConfigManager {
             configs[DEFAULT_NAME] = ViewModelConfig()
             println("[ViewModel] Default config created")
         }
+    }
+
+    private fun importLegacyIfMissing() {
+        if (!legacyFile.exists()) return
+        if (configs.containsKey(DEFAULT_NAME)) return
+
+        runCatching { json.decodeFromString<ViewModelConfig>(legacyFile.readText()) }
+            .onSuccess {
+                configs[DEFAULT_NAME] = it
+                println("[ViewModel] Migrated legacy viewmodel.json into Default profile")
+            }
+            .onFailure { println("[ViewModel] Failed to migrate legacy config: ${it.message}") }
     }
 
     private fun nameUnchangedPersist(name: String, config: ViewModelConfig) {
