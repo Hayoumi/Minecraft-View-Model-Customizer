@@ -5,7 +5,7 @@ import com.viewmodel.ViewModelConfigManager
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.widget.TextFieldWidget
 import net.minecraft.client.gui.screen.Screen
-import net.minecraft.client.gui.widget.TextFieldWidget
+import net.minecraft.client.gui.widget.TextFieldWidget as ConfigTextFieldWidget
 import net.minecraft.text.Text
 import kotlin.math.max
 
@@ -39,7 +39,7 @@ class ViewModelScreen : Screen(Text.empty()) {
         const val HEADER_SPACING = 34
     }
 
-    private lateinit var nameField: TextFieldWidget
+    private lateinit var nameField: ConfigTextFieldWidget
     private var currentName = ""
     private var allConfigs: List<String> = emptyList()
 
@@ -210,14 +210,14 @@ class ViewModelScreen : Screen(Text.empty()) {
         dropdownBounds = Bounds(configX + padding, dropdownY, CONFIG_WIDTH - padding * 2, dropdownHeight)
 
         val nameLabelY = dropdownY + dropdownHeight + verticalGap
-        nameField = TextFieldWidget(textRenderer, configX + padding, nameLabelY + 12, CONFIG_WIDTH - padding * 2, fieldHeight, Text.empty())
+        nameField = ConfigTextFieldWidget(textRenderer, configX + padding, nameLabelY + 12, CONFIG_WIDTH - padding * 2, fieldHeight, Text.empty())
         nameField.text = currentName
         nameField.setEditableColor(TEXT)
 
         val buttonsY = nameField.y + fieldHeight + verticalGap
         val buttonWidth = (CONFIG_WIDTH - padding * 2 - SPACING) / 2
         buttons.add(
-            CompactButton(configX + padding, buttonsY, buttonWidth, buttonHeight, Text.literal("New")) { createConfig() }
+            CompactButton(configX + padding, buttonsY, buttonWidth, buttonHeight, Text.literal("New")) { createConfigProfile() }
         )
         val rename = CompactButton(
             configX + padding + buttonWidth + SPACING,
@@ -225,14 +225,14 @@ class ViewModelScreen : Screen(Text.empty()) {
             buttonWidth,
             buttonHeight,
             Text.literal("Rename")
-        ) { renameConfig() }
+        ) { renameConfigProfile() }
         val delete = CompactButton(
             configX + padding,
             buttonsY + buttonHeight + 4,
             CONFIG_WIDTH - padding * 2,
             buttonHeight,
             Text.literal("Delete")
-        ) { deleteConfig() }
+        ) { deleteConfigProfile() }
 
         val canModify = !ViewModelConfigManager.isDefault(currentName) && allConfigs.size > 1
         rename.active = canModify
@@ -242,14 +242,14 @@ class ViewModelScreen : Screen(Text.empty()) {
         buttons.add(delete)
     }
 
-    private fun selectConfig(name: String) {
+    private fun selectConfigProfile(name: String) {
         if (ViewModelConfigManager.setActive(name)) {
             currentName = ViewModelConfigManager.currentName
             client?.setScreen(ViewModelScreen())
         }
     }
 
-    private fun createConfig() {
+    private fun createConfigProfile() {
         val requested = nameField.text.ifBlank { "New" }
         if (ViewModelConfigManager.createConfig(requested)) {
             allConfigs = ViewModelConfigManager.getConfigNames()
@@ -258,7 +258,7 @@ class ViewModelScreen : Screen(Text.empty()) {
         }
     }
 
-    private fun renameConfig() {
+    private fun renameConfigProfile() {
         if (ViewModelConfigManager.renameConfig(currentName, nameField.text)) {
             currentName = ViewModelConfigManager.currentName
             allConfigs = ViewModelConfigManager.getConfigNames()
@@ -266,118 +266,10 @@ class ViewModelScreen : Screen(Text.empty()) {
         }
     }
 
-    private fun deleteConfig() {
+    private fun deleteConfigProfile() {
         if (ViewModelConfigManager.deleteConfig(currentName)) {
             currentName = ViewModelConfigManager.currentName
             allConfigs = ViewModelConfigManager.getConfigNames()
-            client?.setScreen(ViewModelScreen())
-        }
-    }
-
-    private fun setupConfigControls(drawerX: Int) {
-        val drawerY = 28
-        val fieldWidth = DRAWER_WIDTH - PADDING * 2
-        contentStartY = 84
-
-        val nameY = drawerY + 36
-        nameField = TextFieldWidget(textRenderer, drawerX + PADDING, nameY, fieldWidth, 16, Text.empty())
-        nameField.text = currentName
-        nameField.setEditableColor(TEXT)
-
-        val buttonWidth = (DRAWER_WIDTH - PADDING * 2 - SPACING) / 2
-        val controlsY = nameY + 22
-        buttons.add(
-            CompactButton(drawerX + PADDING, controlsY, buttonWidth, 18, Text.literal("New")) { createConfig() }
-        )
-        val rename = CompactButton(
-            drawerX + PADDING + buttonWidth + SPACING,
-            controlsY,
-            buttonWidth,
-            18,
-            Text.literal("Rename")
-        ) { renameConfig() }
-        val delete = CompactButton(
-            drawerX + PADDING,
-            controlsY + 22,
-            DRAWER_WIDTH - PADDING * 2,
-            18,
-            Text.literal("Delete")
-        ) { deleteConfig() }
-
-        val canModify = !ViewModelConfigManager.isDefault(currentName) && allConfigs.size > 1
-        rename.active = canModify
-        delete.active = canModify
-
-        buttons.add(rename)
-        buttons.add(delete)
-
-        var listY = controlsY + 22 + 26
-        allConfigs.forEach { config ->
-            val entry = CompactButton(
-                drawerX + PADDING,
-                listY,
-                DRAWER_WIDTH - PADDING * 2,
-                LIST_ITEM_H,
-                Text.literal(config),
-                selected = config == currentName
-            ) { selectConfig(config) }
-            listY += LIST_ITEM_H + 4
-            buttons.add(entry)
-        }
-    }
-
-    private fun renderConfigDrawer(context: DrawContext, drawerX: Int, mouseX: Int, mouseY: Int) {
-        val drawerY = 28
-        val drawerHeight = height - DRAWER_HEIGHT_OFFSET
-        context.fill(drawerX, drawerY, drawerX + DRAWER_WIDTH, drawerY + drawerHeight, CARD)
-        drawBorder(context, drawerX, drawerY, DRAWER_WIDTH, drawerHeight)
-
-        context.drawText(
-            textRenderer,
-            Text.literal("Configs").styled { it.withBold(true) },
-            drawerX + PADDING,
-            drawerY - 10,
-            TEXT_DIM,
-            false
-        )
-
-        context.drawText(
-            textRenderer,
-            Text.literal("Name"),
-            drawerX + PADDING,
-            48,
-            TEXT_DIM,
-            false
-        )
-
-        nameField.render(context, mouseX, mouseY, 0f)
-    }
-
-    private fun selectConfig(name: String) {
-        if (ViewModelConfigManager.setActive(name)) {
-            currentName = ViewModelConfigManager.currentName
-            client?.setScreen(ViewModelScreen())
-        }
-    }
-
-    private fun createConfig() {
-        val requested = nameField.text.ifBlank { "New" }
-        if (ViewModelConfigManager.createConfig(requested)) {
-            currentName = ViewModelConfigManager.currentName
-            client?.setScreen(ViewModelScreen())
-        }
-    }
-
-    private fun renameConfig() {
-        if (ViewModelConfigManager.renameConfig(currentName, nameField.text)) {
-            currentName = ViewModelConfigManager.currentName
-            client?.setScreen(ViewModelScreen())
-        }
-    }
-
-    private fun deleteConfig() {
-        if (ViewModelConfigManager.deleteConfig(currentName)) {
-            currentName = ViewModelConfigManager.currentName
             client?.setScreen(ViewModelScreen())
         }
     }
@@ -555,7 +447,7 @@ class ViewModelScreen : Screen(Text.empty()) {
         if (configMenuOpen) {
             dropdownItems.firstOrNull { it.second.contains(mouseX, mouseY) }?.let {
                 configMenuOpen = false
-                selectConfig(it.first)
+                selectConfigProfile(it.first)
                 return true
             }
 
