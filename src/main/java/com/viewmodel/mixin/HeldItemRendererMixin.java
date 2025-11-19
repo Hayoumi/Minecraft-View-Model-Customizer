@@ -27,21 +27,21 @@ public abstract class HeldItemRendererMixin {
      * ГЛАВНАЯ ТРАНСФОРМАЦИЯ: позиция/масштаб/вращение из GUI
      */
     @Redirect(
-        method = "renderFirstPersonItem",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/client/render/item/HeldItemRenderer;renderItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ModelTransformationMode;ZLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V"
-        )
+            method = "renderFirstPersonItem",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/render/item/HeldItemRenderer;renderItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ModelTransformationMode;ZLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V"
+            )
     )
     private void applyTransformsBeforeRender(
-        HeldItemRenderer instance,
-        LivingEntity entity,
-        ItemStack stack,
-        ModelTransformationMode renderMode,
-        boolean leftHanded,
-        MatrixStack matrices,
-        VertexConsumerProvider vertexConsumers,
-        int light
+            HeldItemRenderer instance,
+            LivingEntity entity,
+            ItemStack stack,
+            ModelTransformationMode renderMode,
+            boolean leftHanded,
+            MatrixStack matrices,
+            VertexConsumerProvider vertexConsumers,
+            int light
     ) {
         if (!stack.isEmpty()) {
             ViewModelConfig config = ViewModelConfig.current;
@@ -70,9 +70,9 @@ public abstract class HeldItemRendererMixin {
 
             if (x != 0 || y != 0 || z != 0) {
                 matrices.translate(
-                    (x / 100.0f) / scale,
-                    (y / 100.0f) / scale,
-                    (z / 100.0f) / scale
+                        (x / 100.0f) / scale,
+                        (y / 100.0f) / scale,
+                        (z / 100.0f) / scale
                 );
             }
         }
@@ -87,17 +87,17 @@ public abstract class HeldItemRendererMixin {
     private void onApplyEquipOffset(MatrixStack matrices, Arm arm, float equipProgress, CallbackInfo ci) {
         ViewModelConfig config = ViewModelConfig.current;
         int dir = (arm == Arm.RIGHT) ? 1 : -1;
-        
+
         // Базовая позиция руки
         matrices.translate(dir * 0.56F, -0.52F, -0.72F);
-        
+
         // БЕЗ анимации опускания (equipProgress * -0.6F)
-        
+
         // ДОБАВЛЯЕМ ПОВОРОТ -45° если включен NO SWING или SCALE SWING
         if (config.getNoSwing() || config.getScaleSwing()) {
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-dir * 0.0F));
         }
-        
+
         ci.cancel();
     }
 
@@ -106,9 +106,9 @@ public abstract class HeldItemRendererMixin {
      * SCALE SWING - масштабируем смещение и вращения
      */
     @Inject(
-        method = "applySwingOffset",
-        at = @At("HEAD"),
-        cancellable = true
+            method = "applySwingOffset",
+            at = @At("HEAD"),
+            cancellable = true
     )
     private void onApplySwingOffset(MatrixStack matrices, Arm arm, float swingProgress, CallbackInfo ci) {
         ViewModelConfig config = ViewModelConfig.current;
