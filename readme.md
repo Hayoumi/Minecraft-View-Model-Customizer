@@ -13,7 +13,6 @@ New v2 GUI and CFG system already here 😱
 - **Position** - Move your viewmodel on X, Y, and Z axes
 - **Rotation** - Adjust Yaw, Pitch, and Roll independently
 - **Scale** - Resize your held items from tiny to massive
-- **Precise Control** - All sliders support 0.05 step increments
 
 ### 🎯 Animation Control
 - **No Swing** - Prevents your item from visually swinging (keeps rotation animations)
@@ -22,9 +21,8 @@ New v2 GUI and CFG system already here 😱
 
 ### ⚙️ Profile system
 - The mod keeps multiple named profiles stored as JSON files in `config/viewmodel/configs/` with the active profile tracked in `config/viewmodel/active.txt`.
-- A protected **Default** profile is regenerated if missing and cannot be deleted or renamed.
 - Every change made in the UI auto-saves to the active profile, preserving your adjustments without extra clicks.
-- Create new profiles, rename them, or delete unused ones directly from the config card; new profiles are created without switching away from your current active profile.
+- Create new profiles, rename them, or delete unused ones directly from the config card.
 - Use the dropdown in the left config card to pick any saved profile instantly.
 
 ### 🎨 Clean UI
@@ -39,11 +37,7 @@ New v2 GUI and CFG system already here 😱
 - Adjust sliders to customize your viewmodel
 - Click ⟲ to reset individual settings
 - Click "Reset All" to restore defaults
-- Settings save automatically on close
-
-## 🔧 Configuration
-
-All settings are stored in `.minecraft/config/viewmodel-customizer.json` and persist between sessions(soon).
+- Settings save automatically in real-time
 
 ## 📸 Preview
 
