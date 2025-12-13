@@ -46,6 +46,6 @@ New v2 GUI and CFG system already here 😱
 ## 🛠️ Building from Source
 
 ```bash
-git clone https://github.com/yourusername/viewmodel-customizer.git
+git clone https://github.com/Hayoumi/Minecraft-View-Model-Customizer
 cd viewmodel-customizer
 ./gradlew build
