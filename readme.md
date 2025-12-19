@@ -1,5 +1,6 @@
 # ViewModel Customizer
 
+![View Model Customizer v3](https://eblo.id/uploads/0cLtw5j/javaw_Z7E9ORQ9W3.png)
 
 A minimalist Open Source Fabric mod for Minecraft 1.21.4+ that gives you complete control over your first-person viewmodel.
 
@@ -39,7 +40,4 @@ New v3 GUI and CFG system already here 😱
 - Click "Reset All" to restore defaults
 - Settings save automatically in real-time
 
-## 📸 Preview
-
-![View Model Customizer 2.1.0](https://cdn.modrinth.com/data/cached_images/9a148b90e4f8bfc5f42a335623390b8c07765b29_0.webp)
 
