@@ -5,7 +5,7 @@ A minimalist Open Source Fabric mod for Minecraft 1.21.4+ that gives you complet
 
 I'll make a mod for other versions too (prob)!
 
-New v2 GUI and CFG system already here 😱
+New v3 GUI and CFG system already here 😱
 
 ## ✨ Features
 
