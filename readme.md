@@ -43,9 +43,3 @@ New v2 GUI and CFG system already here 😱
 
 ![Viewmodel Customizer 1.0.0](https://cdn.modrinth.com/data/cached_images/e10d380bdc8361d6abece53d593e7e52a32c330d_0.webp)
 
-## 🛠️ Building from Source
-
-```bash
-git clone https://github.com/Hayoumi/Minecraft-View-Model-Customizer
-cd viewmodel-customizer
-./gradlew build
