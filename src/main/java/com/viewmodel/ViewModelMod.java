@@ -11,9 +11,6 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Registers the keybinding that opens the compact config screen.
- */
 public final class ViewModelMod implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger("viewmodel");
     private static KeyBinding openScreenKey;

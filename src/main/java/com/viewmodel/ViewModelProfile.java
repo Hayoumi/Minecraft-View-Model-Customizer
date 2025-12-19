@@ -1,8 +1,5 @@
 package com.viewmodel;
 
-/**
- * Immutable snapshot of every tweakable viewmodel parameter.
- */
 public record ViewModelProfile(
     String name,
     float size,

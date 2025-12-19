@@ -24,6 +24,13 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${project.property("fabric_language_kotlin_version")}")
+
+    val lwjglVersion = "3.3.3"
+    implementation("org.lwjgl:lwjgl-nanovg:$lwjglVersion")
+    runtimeOnly("org.lwjgl:lwjgl-nanovg:$lwjglVersion:natives-windows")
+    runtimeOnly("org.lwjgl:lwjgl-nanovg:$lwjglVersion:natives-linux")
+    runtimeOnly("org.lwjgl:lwjgl-nanovg:$lwjglVersion:natives-macos")
+    runtimeOnly("org.lwjgl:lwjgl-nanovg:$lwjglVersion:natives-macos-arm64")
 }
 
 tasks.processResources {

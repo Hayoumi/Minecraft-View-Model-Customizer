@@ -18,10 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Mutable backing config queried by HeldItemRenderer mixins.
- * Values are kept in a singleton so they are easy to mutate from both Kotlin/Java UI pieces.
- */
 public final class ViewModelConfig {
     public static final ViewModelConfig current = new ViewModelConfig();
     private static final ViewModelProfileManager PROFILE_MANAGER = new ViewModelProfileManager();

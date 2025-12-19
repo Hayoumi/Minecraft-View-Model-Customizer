@@ -4,10 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Simple in-memory profile registry so the config screen can switch layouts quickly.
- * Persistence can hook into this later and hydrate the list from disk.
- */
 public final class ViewModelProfileManager {
     private final List<ViewModelProfile> profiles = new ArrayList<>();
     private int activeIndex;

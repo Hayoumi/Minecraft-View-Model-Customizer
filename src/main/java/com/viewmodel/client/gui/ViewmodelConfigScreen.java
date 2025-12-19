@@ -3,6 +3,7 @@ package com.viewmodel.client.gui;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
@@ -24,44 +25,93 @@ import net.minecraft.client.gui.widget.PressableWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.util.Identifier;
+import com.mojang.blaze3d.systems.RenderSystem;
+import org.lwjgl.nanovg.NanoVG;
+import org.lwjgl.nanovg.NanoVGGL3;
+import org.lwjgl.nanovg.NVGColor;
+import org.lwjgl.system.MemoryStack;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL11;
 
-/**
- * Minimal two-panel screen used to tweak viewmodel transforms.
- */
 public class ViewmodelConfigScreen extends Screen {
-    private static final int LEFT_PANEL_WIDTH = 160;
-    private static final int RIGHT_PANEL_WIDTH = 350;
-    private static final int PANEL_SPACING = 12;
-    private static final int PANEL_PADDING = 14;
-    private static final int LABEL_COLUMN_WIDTH = 34;
-    private static final int VALUE_COLUMN_WIDTH = 60;
-    private static final int ROW_SPACING = 28;
-    private static final int RESET_BUTTON_SIZE = 20;
-    private static final int COLUMN_GAP = 6;
-    private static final int SECTION_HEADER_GAP = 16;
-    private static final int SECTION_LABEL_OFFSET = 12;
-    private static final int SECTION_LABEL_TO_SLIDER_GAP = 10;
-    private static final int RIGHT_PANEL_CONTENT_OFFSET = 28;
-    private static final int PROFILES_HEADER_GAP = 22;
-    private static final int STATUS_FOOTER_SPACE = 20;
+    private static final int LEFT_PANEL_WIDTH = 179;
+    private static final int RIGHT_PANEL_WIDTH = 424;
+    private static final int LEFT_PANEL_HEIGHT = 109;
+    private static final int RIGHT_PANEL_HEIGHT = 310;
+    private static final int LEFT_PANEL_PADDING = 12;
+    private static final int RIGHT_PANEL_PADDING = 21;
+    private static final int LEFT_PANEL_Y_OFFSET = 0;
+    private static final int PANEL_SPACING = 13;
+    private static final int SLIDER_TOP_OFFSET = 51;
+    private static final int SLIDER_ROW_SPACING = 26;
+    private static final int SLIDER_GROUP_GAP = 3;
+    private static final int SLIDER_LABEL_OFFSET = 9;
+    private static final int SLIDER_VALUE_OFFSET = 1;
+    private static final int SLIDER_TRACK_HEIGHT = 4;
+    private static final int SLIDER_TRACK_RADIUS = 2;
+    private static final int SLIDER_KNOB_SIZE = 8;
+    private static final int RESET_ICON_SIZE = 20;
+    private static final int RESET_ICON_RADIUS = 5;
+    private static final int SLIDER_ICON_GAP = 15;
+    private static final int VALUE_COLUMN_WIDTH = 2;
+    private static final int RESET_PROFILE_BUTTON_HEIGHT = 20;
+    private static final int RESET_BUTTON_Y_OFFSET = 249;
+    private static final int TOGGLE_HEIGHT = 12;
+    private static final int TOGGLE_Y_OFFSET = 288;
+    private static final int TOGGLE_GAP = 13;
+    private static final int TOGGLE_SWITCH_WIDTH = 32;
+    private static final int TOGGLE_LABEL_GAP = 10;
+    private static final int PANEL_RADIUS = 6;
+    private static final int BUTTON_RADIUS = 4;
+    private static final int DROPDOWN_RADIUS = 4;
+    private static final int RESET_BUTTON_RADIUS = 6;
+    private static final float TEXT_SCALE = 1.0f;
+    private static final float VALUE_SCALE = 1.0f;
+    private static final float TOGGLE_LABEL_SCALE = 1.15f;
+    private static final boolean USE_NANOVG = true;
+    private static final boolean USE_NANOVG_ICON = false;
     private static final DecimalFormat VALUE_FORMAT = new DecimalFormat("+0.00;-0.00");
-    private static final int COLOR_BACKDROP = 0xD0101010;
-    private static final int COLOR_PANEL_BG = 0xFF121212;
-    private static final int COLOR_PANEL_BORDER = 0xFF2A2A2A;
-    private static final int COLOR_TEXT_PRIMARY = 0xFFF0F0F0;
-    private static final int COLOR_TEXT_MUTED = 0xFF9FA1A5;
-    private static final int COLOR_TEXT_DARK = 0xFF050505;
-    private static final int COLOR_ACCENT = 0xFF5CC8C1;
-    private static final int COLOR_ACCENT_HOVER = 0xFF6FD6CF;
-    private static final int COLOR_TRACK_BG = 0xFF1E1E1E;
-    private static final int COLOR_TRACK_FILL = 0xFF5CC8C1;
-    private static final int COLOR_TOGGLE_OFF = 0xFF1F1F1F;
+    private static final Identifier TEX_ROUNDED_R8 = Identifier.of("viewmodel", "textures/gui/rounded_r8.png");
+    private static final Identifier TEX_ROUNDED_R4 = Identifier.of("viewmodel", "textures/gui/rounded_r4.png");
+    private static final Identifier TEX_ROUNDED_R2 = Identifier.of("viewmodel", "textures/gui/rounded_r2.png");
+    private static final Identifier TEX_REFRESH = Identifier.of("viewmodel", "textures/gui/znak.png");
+    private static final int TEX_REFRESH_WIDTH = 43;
+    private static final int TEX_REFRESH_HEIGHT = 41;
+    private static final int RESET_ICON_GLYPH_U = 3;
+    private static final int RESET_ICON_GLYPH_V = 2;
+    private static final int RESET_ICON_GLYPH_REGION = 37;
+    private static final int RESET_ICON_GLYPH_WIDTH = 12;
+    private static final int RESET_ICON_GLYPH_HEIGHT = 12;
+    private static final int TEX_R8_SIZE = 32;
+    private static final int TEX_R4_SIZE = 16;
+    private static final int TEX_R2_SIZE = 8;
+    private static final int COLOR_BACKDROP = 0x80101012;
+    private static final int COLOR_PANEL_BG = 0xFF171718;
+    private static final int COLOR_PANEL_BORDER = 0xFF0F101A;
+    private static final int COLOR_PANEL_SHADOW = 0x55000000;
+    private static final int COLOR_TEXT_PRIMARY = 0xFFC5C5C5;
+    private static final int COLOR_TEXT_MUTED = 0xFF696969;
+    private static final int COLOR_ACCENT = 0xFF8F62EC;
+    private static final int COLOR_ACCENT_HOVER = 0xFFA174F0;
+    private static final int COLOR_TRACK_BG = 0xFF38393A;
+    private static final int COLOR_TRACK_FILL = COLOR_ACCENT;
+    private static final int COLOR_TOGGLE_OFF = 0xFF343435;
+    private static final int COLOR_BUTTON_CREATE = 0xFF382B52;
+    private static final int COLOR_BUTTON_RENAME = 0xFF3B3A3A;
+    private static final int COLOR_BUTTON_DELETE = 0xFF2B1B1C;
+    private static final int COLOR_BUTTON_BORDER = 0xFF2A2A2D;
+    private static final int COLOR_DROPDOWN_BG = 0xFF3B3A3A;
+    private static final int COLOR_DROPDOWN_SELECTED = 0xFF444346;
+    private static final int COLOR_RESET_TOP = 0xFF373738;
+    private static final int COLOR_RESET_BOTTOM = 0xFF2C2C2D;
+    private static final int COLOR_RESET_TOP_HOVER = 0xFF424243;
+    private static final int COLOR_RESET_BOTTOM_HOVER = 0xFF323234;
 
     private final Screen parent;
     private final ViewModelProfileManager profileManager = ViewModelConfig.profiles();
     private final List<SliderLine> sliderLines = new ArrayList<>();
-    private final List<SectionLabel> sectionLabels = new ArrayList<>();
 
     private ProfileDropdownWidget profileDropdown;
     private ToggleSwitchWidget noSwingToggle;
@@ -73,8 +123,8 @@ public class ViewmodelConfigScreen extends Screen {
     private int leftPanelY;
     private int rightPanelX;
     private int rightPanelY;
-    private int leftPanelHeight = 210;
-    private int rightPanelHeight = 440;
+    private int leftPanelHeight = LEFT_PANEL_HEIGHT;
+    private int rightPanelHeight = RIGHT_PANEL_HEIGHT;
 
     public ViewmodelConfigScreen(Screen parent) {
         super(Text.empty());
@@ -84,25 +134,24 @@ public class ViewmodelConfigScreen extends Screen {
     @Override
     protected void init() {
         this.sliderLines.clear();
-        this.sectionLabels.clear();
         this.clearChildren();
 
         int totalWidth = LEFT_PANEL_WIDTH + RIGHT_PANEL_WIDTH + PANEL_SPACING;
         this.leftPanelX = (this.width - totalWidth) / 2;
         this.rightPanelX = this.leftPanelX + LEFT_PANEL_WIDTH + PANEL_SPACING;
-        this.leftPanelY = (this.height - this.rightPanelHeight) / 2;
-        this.rightPanelY = this.leftPanelY;
+        this.rightPanelY = (this.height - this.rightPanelHeight) / 2;
+        this.leftPanelY = this.rightPanelY + LEFT_PANEL_Y_OFFSET;
 
         buildSidebar();
         buildSliders();
     }
 
     private void buildSidebar() {
-        int dropdownWidth = LEFT_PANEL_WIDTH - PANEL_PADDING * 2;
+        int dropdownWidth = LEFT_PANEL_WIDTH - LEFT_PANEL_PADDING * 2;
         List<String> names = profileManager.profileNames();
         ProfileDropdownWidget dropdown = new ProfileDropdownWidget(
-            leftPanelX + PANEL_PADDING,
-            leftPanelY + PANEL_PADDING + PROFILES_HEADER_GAP,
+            leftPanelX + LEFT_PANEL_PADDING,
+            leftPanelY + 38,
             dropdownWidth,
             18,
             names,
@@ -110,52 +159,47 @@ public class ViewmodelConfigScreen extends Screen {
             this::handleProfileSelection
         );
 
-        int buttonsY = dropdown.getY() + dropdown.getHeight() + 10;
+        int buttonsY = dropdown.getY() + dropdown.getHeight() + 8;
         int buttonWidth = (dropdownWidth - 8) / 3;
 
         this.addDrawableChild(new AccentButton(
-            leftPanelX + PANEL_PADDING,
+            leftPanelX + LEFT_PANEL_PADDING,
             buttonsY,
             buttonWidth,
-            18,
+            16,
             Text.literal("Create"),
             this::handleCreateProfile
         ));
 
         this.addDrawableChild(new MinimalButton(
-            leftPanelX + PANEL_PADDING + buttonWidth + 4,
+            leftPanelX + LEFT_PANEL_PADDING + buttonWidth + 4,
             buttonsY,
             buttonWidth,
-            18,
+            16,
             Text.literal("Rename"),
             this::handleRenameProfile,
-            0xFF191919,
-            0xFF242424
+            COLOR_BUTTON_RENAME,
+            COLOR_BUTTON_RENAME
         ));
 
         this.addDrawableChild(new DangerButton(
-            leftPanelX + PANEL_PADDING + (buttonWidth + 4) * 2,
+            leftPanelX + LEFT_PANEL_PADDING + (buttonWidth + 4) * 2,
             buttonsY,
             buttonWidth,
-            18,
+            16,
             Text.literal("Delete"),
             this::handleDeleteProfile
         ));
-
-        int buttonsBottom = buttonsY + 18;
-        this.leftPanelHeight = Math.max(
-            140,
-            buttonsBottom - leftPanelY + PANEL_PADDING + STATUS_FOOTER_SPACE
-        );
+        this.leftPanelHeight = LEFT_PANEL_HEIGHT;
 
         this.profileDropdown = this.addDrawableChild(dropdown);
     }
 
     private void buildSliders() {
-        int cursorY = rightPanelY + PANEL_PADDING + RIGHT_PANEL_CONTENT_OFFSET;
+        int cursorY = rightPanelY + SLIDER_TOP_OFFSET;
 
         cursorY = addSliderRow(
-            "SIZE",
+            "Size",
             0.15,
             2.0,
             0.01,
@@ -164,10 +208,7 @@ public class ViewmodelConfigScreen extends Screen {
             value -> setAndSync(ViewModelConfig.current::setSize, value),
             cursorY
         );
-
-        cursorY += SECTION_HEADER_GAP;
-        sectionLabels.add(new SectionLabel("POSITION", rightPanelX + PANEL_PADDING, cursorY - SECTION_LABEL_OFFSET));
-        cursorY += SECTION_LABEL_TO_SLIDER_GAP;
+        cursorY += SLIDER_GROUP_GAP;
 
         cursorY = addSliderRow(
             "X",
@@ -201,10 +242,7 @@ public class ViewmodelConfigScreen extends Screen {
             value -> setAndSync(ViewModelConfig.current::setPositionZ, value),
             cursorY
         );
-
-        cursorY += SECTION_HEADER_GAP;
-        sectionLabels.add(new SectionLabel("ROTATION", rightPanelX + PANEL_PADDING, cursorY - SECTION_LABEL_OFFSET));
-        cursorY += SECTION_LABEL_TO_SLIDER_GAP;
+        cursorY += SLIDER_GROUP_GAP;
 
         cursorY = addSliderRow(
             "Yaw",
@@ -239,40 +277,46 @@ public class ViewmodelConfigScreen extends Screen {
             cursorY
         );
 
-        cursorY += 12;
+        TextRenderer font = this.textRenderer;
+        int leftLabelWidth = Math.round(font.getWidth(Text.literal("NO SWING")) * TOGGLE_LABEL_SCALE);
+        int rightLabelWidth = Math.round(font.getWidth(Text.literal("SCALE SWING")) * TOGGLE_LABEL_SCALE);
+        int leftToggleWidth = leftLabelWidth + TOGGLE_LABEL_GAP + TOGGLE_SWITCH_WIDTH;
+        int rightToggleWidth = rightLabelWidth + TOGGLE_LABEL_GAP + TOGGLE_SWITCH_WIDTH;
+        int toggleY = rightPanelY + TOGGLE_Y_OFFSET;
+        int resetButtonY = rightPanelY + RESET_BUTTON_Y_OFFSET;
+        int leftToggleX = rightPanelX + RIGHT_PANEL_PADDING;
+        int rightToggleX = rightPanelX + RIGHT_PANEL_WIDTH - RIGHT_PANEL_PADDING - rightToggleWidth;
+        if (rightToggleX < leftToggleX + leftToggleWidth + TOGGLE_GAP) {
+            rightToggleX = leftToggleX + leftToggleWidth + TOGGLE_GAP;
+        }
+
+        this.addDrawableChild(new GradientButton(
+            rightPanelX + RIGHT_PANEL_PADDING,
+            resetButtonY,
+            RIGHT_PANEL_WIDTH - RIGHT_PANEL_PADDING * 2,
+            RESET_PROFILE_BUTTON_HEIGHT,
+            Text.literal("Reset profile"),
+            this::handleResetAll
+        ));
+
         this.noSwingToggle = this.addDrawableChild(new ToggleSwitchWidget(
-            rightPanelX + PANEL_PADDING,
-            cursorY,
-            RIGHT_PANEL_WIDTH - PANEL_PADDING * 2,
-            20,
+            leftToggleX,
+            toggleY,
+            leftToggleWidth,
+            TOGGLE_HEIGHT,
             Text.literal("NO SWING"),
             () -> ViewModelConfig.current.getNoSwing(),
             value -> setAndSync(ViewModelConfig.current::setNoSwing, value)
         ));
 
-        cursorY += 28;
         this.scaleSwingToggle = this.addDrawableChild(new ToggleSwitchWidget(
-            rightPanelX + PANEL_PADDING,
-            cursorY,
-            RIGHT_PANEL_WIDTH - PANEL_PADDING * 2,
-            20,
+            rightToggleX,
+            toggleY,
+            rightToggleWidth,
+            TOGGLE_HEIGHT,
             Text.literal("SCALE SWING"),
             () -> ViewModelConfig.current.getScaleSwing(),
             value -> setAndSync(ViewModelConfig.current::setScaleSwing, value)
-        ));
-
-        cursorY += 20;
-        int resetButtonY = Math.max(cursorY, rightPanelY + rightPanelHeight - PANEL_PADDING - 24);
-        this.addDrawableChild(new MinimalButton(
-            rightPanelX + PANEL_PADDING,
-            resetButtonY,
-            RIGHT_PANEL_WIDTH - PANEL_PADDING * 2,
-            20,
-            Text.literal("Reset All"),
-            this::handleResetAll,
-            0xFF181818,
-            0xFF212121,
-            COLOR_ACCENT
         ));
     }
 
@@ -286,20 +330,21 @@ public class ViewmodelConfigScreen extends Screen {
         DoubleConsumer setter,
         int y
     ) {
-        int labelX = rightPanelX + PANEL_PADDING;
-        int sliderX = labelX + LABEL_COLUMN_WIDTH + COLUMN_GAP;
+        int resetX = rightPanelX + RIGHT_PANEL_PADDING;
+        int sliderX = resetX + RESET_ICON_SIZE + SLIDER_ICON_GAP;
         int sliderWidth = RIGHT_PANEL_WIDTH
-            - PANEL_PADDING * 2
-            - LABEL_COLUMN_WIDTH
-            - VALUE_COLUMN_WIDTH
-            - RESET_BUTTON_SIZE
-            - COLUMN_GAP * 3;
+            - RIGHT_PANEL_PADDING * 2
+            - RESET_ICON_SIZE
+            - SLIDER_ICON_GAP
+            - VALUE_COLUMN_WIDTH;
+        int sliderY = y;
+        int sliderHeight = SLIDER_TRACK_HEIGHT + 8;
 
         NeonSlider slider = this.addDrawableChild(new NeonSlider(
             sliderX,
-            y,
+            sliderY,
             sliderWidth,
-            16,
+            sliderHeight,
             min,
             max,
             step,
@@ -307,16 +352,20 @@ public class ViewmodelConfigScreen extends Screen {
             setter
         ));
 
-        int valueX = sliderX + sliderWidth + COLUMN_GAP;
-        sliderLines.add(new SliderLine(label, slider, supplier, labelX, y + 4, valueX));
+        int labelX = sliderX;
+        int labelY = sliderY - SLIDER_LABEL_OFFSET;
+        int valueRightX = rightPanelX + RIGHT_PANEL_WIDTH - RIGHT_PANEL_PADDING;
+        int valueY = labelY + SLIDER_VALUE_OFFSET;
+        sliderLines.add(new SliderLine(label, slider, supplier, labelX, labelY, valueRightX, valueY));
 
+        int iconY = sliderY + sliderHeight / 2 - RESET_ICON_SIZE / 2;
         this.addDrawableChild(new ResetButton(
-            valueX + VALUE_COLUMN_WIDTH + COLUMN_GAP,
-            y,
+            resetX,
+            iconY,
             () -> slider.resetTo(resetValue)
         ));
 
-        return y + ROW_SPACING;
+        return y + SLIDER_ROW_SPACING;
     }
 
     private void handleCreateProfile() {
@@ -452,29 +501,54 @@ public class ViewmodelConfigScreen extends Screen {
         drawPanel(context, rightPanelX, rightPanelY, RIGHT_PANEL_WIDTH, rightPanelHeight);
 
         TextRenderer font = this.textRenderer;
-        context.drawText(font, Text.literal("PROFILES"), leftPanelX + PANEL_PADDING, leftPanelY + PANEL_PADDING, COLOR_TEXT_PRIMARY, false);
-        context.drawText(font, Text.literal("VIEWMODEL SETTINGS"), rightPanelX + PANEL_PADDING, rightPanelY + PANEL_PADDING, COLOR_TEXT_PRIMARY, false);
-
-        for (SectionLabel section : sectionLabels) {
-            context.drawText(font, Text.literal(section.text()), section.x(), section.y(), COLOR_TEXT_MUTED, false);
-        }
+        drawScaledText(
+            context,
+            Text.literal("PROFILES"),
+            leftPanelX + LEFT_PANEL_PADDING,
+            leftPanelY + 12,
+            COLOR_TEXT_PRIMARY,
+            TEXT_SCALE
+        );
+        String header = profileManager.getActiveProfile().name().toUpperCase(Locale.ROOT);
+        drawScaledText(
+            context,
+            Text.literal(header),
+            rightPanelX + RIGHT_PANEL_PADDING,
+            rightPanelY + 12,
+            COLOR_TEXT_PRIMARY,
+            TEXT_SCALE
+        );
 
         super.render(context, mouseX, mouseY, delta);
 
         for (SliderLine line : sliderLines) {
-            context.drawText(font, Text.literal(line.label()), line.labelX(), line.labelY(), COLOR_TEXT_PRIMARY, false);
-            context.drawText(font, Text.literal(line.slider().formattedValue(VALUE_FORMAT)), line.valueX(), line.labelY(), COLOR_ACCENT, false);
+            drawScaledText(
+                context,
+                Text.literal(line.label()),
+                line.labelX(),
+                line.labelY(),
+                COLOR_TEXT_MUTED,
+                TEXT_SCALE
+            );
+            String value = line.slider().formattedValue(VALUE_FORMAT);
+            Text valueText = Text.literal(value);
+            float scaledWidth = font.getWidth(valueText) * VALUE_SCALE;
+            int valueX = line.valueRightX() - Math.round(scaledWidth);
+            drawScaledText(context, valueText, valueX, line.valueY(), COLOR_TEXT_PRIMARY, VALUE_SCALE);
         }
 
         if (statusMessage != null && statusTicks > 0 && !statusMessage.getString().isEmpty()) {
-            context.drawText(
-                font,
+            drawScaledText(
+                context,
                 statusMessage,
-                leftPanelX + PANEL_PADDING,
-                leftPanelY + leftPanelHeight - PANEL_PADDING,
+                leftPanelX + LEFT_PANEL_PADDING,
+                leftPanelY + leftPanelHeight - 16,
                 COLOR_ACCENT,
-                false
+                TEXT_SCALE
             );
+        }
+        if (profileDropdown != null && profileDropdown.isOpen()) {
+            profileDropdown.renderOverlay(context);
         }
     }
 
@@ -483,8 +557,248 @@ public class ViewmodelConfigScreen extends Screen {
     }
 
     private void drawPanel(DrawContext context, int x, int y, int width, int height) {
-        context.fill(x, y, x + width, y + height, COLOR_PANEL_BG);
-        context.drawBorder(x, y, width, height, COLOR_PANEL_BORDER);
+        drawRoundedRect(context, x + 2, y + 3, width, height, PANEL_RADIUS, COLOR_PANEL_SHADOW);
+        drawRoundedRect(context, x, y, width, height, PANEL_RADIUS, COLOR_PANEL_BORDER);
+        drawRoundedRect(context, x + 1, y + 1, width - 2, height - 2, PANEL_RADIUS - 1, COLOR_PANEL_BG);
+    }
+
+    private void drawScaledText(DrawContext context, Text text, int x, int y, int color, float scale) {
+        context.getMatrices().push();
+        context.getMatrices().scale(scale, scale, 1.0f);
+        int scaledX = Math.round(x / scale);
+        int scaledY = Math.round(y / scale);
+        context.drawText(this.textRenderer, text, scaledX, scaledY, color, false);
+        context.getMatrices().pop();
+    }
+
+    private static void drawRoundedRect(DrawContext context, int x, int y, int width, int height, int radius, int color) {
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+        if (USE_NANOVG && NanoVGHelper.drawRoundedRect(x, y, width, height, radius, color)) {
+            return;
+        }
+        TextureSpec spec = TextureSpec.fromRadius(radius);
+        if (spec == null) {
+            context.fill(x, y, x + width, y + height, color);
+            return;
+        }
+        drawNineSlice(context, spec, x, y, width, height, color);
+    }
+
+    private static void drawNineSlice(DrawContext context, TextureSpec spec, int x, int y, int width, int height, int color) {
+        int c = spec.corner;
+        int innerW = Math.max(0, width - c * 2);
+        int innerH = Math.max(0, height - c * 2);
+
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        drawSlice(context, spec.texture, x, y, c, c, 0, 0, c, c, spec.size, spec.size, color);
+        drawSlice(context, spec.texture, x + width - c, y, c, c, spec.size - c, 0, c, c, spec.size, spec.size, color);
+        drawSlice(context, spec.texture, x, y + height - c, c, c, 0, spec.size - c, c, c, spec.size, spec.size, color);
+        drawSlice(context, spec.texture, x + width - c, y + height - c, c, c, spec.size - c, spec.size - c, c, c, spec.size, spec.size, color);
+
+        if (innerW > 0) {
+            int regionW = spec.size - c * 2;
+            drawSlice(context, spec.texture, x + c, y, innerW, c, c, 0, regionW, c, spec.size, spec.size, color);
+            drawSlice(context, spec.texture, x + c, y + height - c, innerW, c, c, spec.size - c, regionW, c, spec.size, spec.size, color);
+        }
+        if (innerH > 0) {
+            int regionH = spec.size - c * 2;
+            drawSlice(context, spec.texture, x, y + c, c, innerH, 0, c, c, regionH, spec.size, spec.size, color);
+            drawSlice(context, spec.texture, x + width - c, y + c, c, innerH, spec.size - c, c, c, regionH, spec.size, spec.size, color);
+        }
+        if (innerW > 0 && innerH > 0) {
+            int regionW = spec.size - c * 2;
+            int regionH = spec.size - c * 2;
+            drawSlice(context, spec.texture, x + c, y + c, innerW, innerH, c, c, regionW, regionH, spec.size, spec.size, color);
+        }
+    }
+
+    private static void drawSlice(
+        DrawContext context,
+        Identifier texture,
+        int x,
+        int y,
+        int width,
+        int height,
+        int u,
+        int v,
+        int regionWidth,
+        int regionHeight,
+        int textureWidth,
+        int textureHeight,
+        int color
+    ) {
+        if (width <= 0 || height <= 0 || regionWidth <= 0 || regionHeight <= 0) {
+            return;
+        }
+        context.drawTexture(
+            RenderLayer::getGuiTextured,
+            texture,
+            x,
+            y,
+            (float) u,
+            (float) v,
+            width,
+            height,
+            regionWidth,
+            regionHeight,
+            textureWidth,
+            textureHeight,
+            color
+        );
+    }
+
+    private static void setShaderColor(int color) {
+        float a = ((color >> 24) & 0xFF) / 255f;
+        float r = ((color >> 16) & 0xFF) / 255f;
+        float g = ((color >> 8) & 0xFF) / 255f;
+        float b = (color & 0xFF) / 255f;
+        RenderSystem.setShaderColor(r, g, b, a);
+    }
+
+    private record TextureSpec(Identifier texture, int size, int corner) {
+        private static TextureSpec fromRadius(int radius) {
+            if (radius >= 7) {
+                return new TextureSpec(TEX_ROUNDED_R8, TEX_R8_SIZE, 8);
+            }
+            if (radius >= 4) {
+                return new TextureSpec(TEX_ROUNDED_R4, TEX_R4_SIZE, 4);
+            }
+            if (radius >= 2) {
+                return new TextureSpec(TEX_ROUNDED_R2, TEX_R2_SIZE, 2);
+            }
+            return null;
+        }
+    }
+
+    private static final class NanoVGHelper {
+        private static final int FLAGS = NanoVGGL3.NVG_ANTIALIAS | NanoVGGL3.NVG_STENCIL_STROKES;
+        private static long vg;
+        private static boolean available = true;
+
+        private NanoVGHelper() {
+        }
+
+        private static void ensureContext() {
+            if (vg != 0 || !available) {
+                return;
+            }
+            try {
+                vg = NanoVGGL3.nvgCreate(FLAGS);
+                if (vg == 0) {
+                    available = false;
+                }
+            } catch (Throwable t) {
+                available = false;
+            }
+        }
+
+        static boolean drawRoundedRect(int x, int y, int width, int height, int radius, int color) {
+            if (!available) {
+                return false;
+            }
+            ensureContext();
+            if (vg == 0) {
+                return false;
+            }
+            MinecraftClient client = MinecraftClient.getInstance();
+            if (client == null) {
+                return false;
+            }
+            float scale = (float) client.getWindow().getScaleFactor();
+            int screenW = client.getWindow().getScaledWidth();
+            int screenH = client.getWindow().getScaledHeight();
+            float r = Math.min(radius, Math.min(width, height) / 2f);
+            if (r <= 0f) {
+                return false;
+            }
+
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+
+            try (MemoryStack stack = MemoryStack.stackPush()) {
+                NVGColor nvgColor = NVGColor.calloc(stack);
+                NanoVG.nvgRGBA(
+                    (byte) ((color >> 16) & 0xFF),
+                    (byte) ((color >> 8) & 0xFF),
+                    (byte) (color & 0xFF),
+                    (byte) ((color >> 24) & 0xFF),
+                    nvgColor
+                );
+
+                NanoVG.nvgBeginFrame(vg, screenW, screenH, scale);
+                NanoVG.nvgBeginPath(vg);
+                NanoVG.nvgRoundedRect(vg, x, y, width, height, r);
+                NanoVG.nvgFillColor(vg, nvgColor);
+                NanoVG.nvgFill(vg);
+                NanoVG.nvgEndFrame(vg);
+            }
+            GL11.glDisable(GL11.GL_STENCIL_TEST);
+            GL11.glDisable(GL11.GL_SCISSOR_TEST);
+            return true;
+        }
+
+        static boolean drawRefreshIcon(int x, int y, int size, int color) {
+            if (!available) {
+                return false;
+            }
+            ensureContext();
+            if (vg == 0) {
+                return false;
+            }
+            MinecraftClient client = MinecraftClient.getInstance();
+            if (client == null) {
+                return false;
+            }
+            float scale = (float) client.getWindow().getScaleFactor();
+            int screenW = client.getWindow().getScaledWidth();
+            int screenH = client.getWindow().getScaledHeight();
+
+            float cx = x + size / 2f;
+            float cy = y + size / 2f;
+            float r = size * 0.28f;
+            float stroke = Math.max(1.2f, size * 0.08f);
+
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+
+            try (MemoryStack stack = MemoryStack.stackPush()) {
+                NVGColor nvgColor = NVGColor.calloc(stack);
+                NanoVG.nvgRGBA(
+                    (byte) ((color >> 16) & 0xFF),
+                    (byte) ((color >> 8) & 0xFF),
+                    (byte) (color & 0xFF),
+                    (byte) ((color >> 24) & 0xFF),
+                    nvgColor
+                );
+
+                NanoVG.nvgBeginFrame(vg, screenW, screenH, scale);
+                NanoVG.nvgBeginPath(vg);
+                NanoVG.nvgStrokeWidth(vg, stroke);
+                NanoVG.nvgStrokeColor(vg, nvgColor);
+                NanoVG.nvgArc(vg, cx, cy, r, (float) Math.toRadians(30), (float) Math.toRadians(320), NanoVG.NVG_CW);
+                NanoVG.nvgStroke(vg);
+
+                float arrowAngle = (float) Math.toRadians(320);
+                float ax = cx + MathHelper.cos(arrowAngle) * r;
+                float ay = cy + MathHelper.sin(arrowAngle) * r;
+                float arrowSize = size * 0.16f;
+
+                NanoVG.nvgBeginPath(vg);
+                NanoVG.nvgMoveTo(vg, ax, ay);
+                NanoVG.nvgLineTo(vg, ax - arrowSize, ay + arrowSize * 0.2f);
+                NanoVG.nvgLineTo(vg, ax - arrowSize * 0.2f, ay + arrowSize);
+                NanoVG.nvgClosePath(vg);
+                NanoVG.nvgFillColor(vg, nvgColor);
+                NanoVG.nvgFill(vg);
+
+                NanoVG.nvgEndFrame(vg);
+            }
+            GL11.glDisable(GL11.GL_STENCIL_TEST);
+            GL11.glDisable(GL11.GL_SCISSOR_TEST);
+            return true;
+        }
     }
 
     private interface FloatSetter {
@@ -495,9 +809,15 @@ public class ViewmodelConfigScreen extends Screen {
         void accept(boolean value);
     }
 
-    private record SliderLine(String label, NeonSlider slider, DoubleSupplier supplier, int labelX, int labelY, int valueX) {}
-
-    private record SectionLabel(String text, int x, int y) {}
+    private record SliderLine(
+        String label,
+        NeonSlider slider,
+        DoubleSupplier supplier,
+        int labelX,
+        int labelY,
+        int valueRightX,
+        int valueY
+    ) {}
 
     private static class NeonSlider extends SliderWidget {
         private final double min;
@@ -528,13 +848,16 @@ public class ViewmodelConfigScreen extends Screen {
 
         @Override
         public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-            int trackY = getY() + this.height / 2 - 2;
-            int knobWidth = 6;
-            int knobX = getX() + (int) (this.value * (this.width - knobWidth));
+            int trackHeight = SLIDER_TRACK_HEIGHT;
+            int knobSize = SLIDER_KNOB_SIZE;
+            int trackY = getY() + this.height / 2 - trackHeight / 2;
+            int knobX = getX() + (int) (this.value * (this.width - knobSize));
+            int knobY = trackY - (knobSize - trackHeight) / 2;
 
-            context.fill(getX(), trackY, getX() + this.width, trackY + 4, COLOR_TRACK_BG);
-            context.fill(getX(), trackY, knobX + knobWidth, trackY + 4, COLOR_TRACK_FILL);
-            context.fill(knobX, getY(), knobX + knobWidth, getY() + this.height, 0xFFE7E7E7);
+            drawRoundedRect(context, getX(), trackY, this.width, trackHeight, SLIDER_TRACK_RADIUS, COLOR_TRACK_BG);
+            drawRoundedRect(context, getX(), trackY, knobX + knobSize - getX(), trackHeight, SLIDER_TRACK_RADIUS, COLOR_TRACK_FILL);
+            int knobRadius = Math.max(1, knobSize / 2);
+            drawRoundedRect(context, knobX, knobY, knobSize, knobSize, knobRadius, 0xFFF2F2F2);
         }
 
         public void resetTo(double target) {
@@ -572,31 +895,33 @@ public class ViewmodelConfigScreen extends Screen {
         private final Runnable action;
 
         ResetButton(int x, int y, Runnable action) {
-            super(x, y, RESET_BUTTON_SIZE, RESET_BUTTON_SIZE, Text.literal("\u21ba"));
+            super(x, y, RESET_ICON_SIZE, RESET_ICON_SIZE, Text.empty());
             this.action = action;
         }
 
         @Override
         protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-            int color = this.isHovered() ? 0xFF2A2A2A : 0xFF1C1C1C;
-            context.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), color);
-            context.drawBorder(getX(), getY(), getWidth(), getHeight(), COLOR_ACCENT);
-            TextRenderer font = MinecraftClient.getInstance().textRenderer;
-            float scale = 1.2f;
-            int textWidth = font.getWidth(getMessage());
-            int textHeight = font.fontHeight;
-            context.getMatrices().push();
-            context.getMatrices().translate(getX() + getWidth() / 2f, getY() + getHeight() / 2f, 0);
-            context.getMatrices().scale(scale, scale, 1.0f);
-            context.drawText(
-                font,
-                getMessage(),
-                (int) (-textWidth / 2f),
-                (int) (-textHeight / 2f),
-                COLOR_ACCENT,
-                false
+            int color = this.isHovered() ? COLOR_ACCENT_HOVER : COLOR_ACCENT;
+            drawRoundedRect(context, getX(), getY(), getWidth(), getHeight(), RESET_ICON_RADIUS, color);
+            if (USE_NANOVG_ICON && NanoVGHelper.drawRefreshIcon(getX(), getY(), getWidth(), 0xFFF6F3FF)) {
+                return;
+            }
+            int glyphX = getX() + (getWidth() - RESET_ICON_GLYPH_WIDTH) / 2;
+            int glyphY = getY() + (getHeight() - RESET_ICON_GLYPH_HEIGHT) / 2;
+            context.drawTexture(
+                RenderLayer::getGuiTextured,
+                TEX_REFRESH,
+                glyphX,
+                glyphY,
+                (float) RESET_ICON_GLYPH_U,
+                (float) RESET_ICON_GLYPH_V,
+                RESET_ICON_GLYPH_WIDTH,
+                RESET_ICON_GLYPH_HEIGHT,
+                RESET_ICON_GLYPH_REGION,
+                RESET_ICON_GLYPH_REGION,
+                TEX_REFRESH_WIDTH,
+                TEX_REFRESH_HEIGHT
             );
-            context.getMatrices().pop();
         }
 
         @Override
@@ -631,11 +956,57 @@ public class ViewmodelConfigScreen extends Screen {
         @Override
         protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
             int fill = this.isHovered() ? hoverColor : baseColor;
-            context.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), fill);
-            context.drawBorder(getX(), getY(), getWidth(), getHeight(), COLOR_PANEL_BORDER);
+            drawRoundedRect(context, getX(), getY(), getWidth(), getHeight(), BUTTON_RADIUS, COLOR_BUTTON_BORDER);
+            drawRoundedRect(context, getX() + 1, getY() + 1, getWidth() - 2, getHeight() - 2, BUTTON_RADIUS - 1, fill);
             TextRenderer font = MinecraftClient.getInstance().textRenderer;
-            int textX = getX() + (getWidth() - font.getWidth(getMessage())) / 2;
-            context.drawText(font, getMessage(), textX, getY() + 5, textColor, false);
+            Text message = getMessage();
+            int textWidth = font.getWidth(message);
+            int textX = getX() + (getWidth() - textWidth) / 2;
+            int textY = getY() + (getHeight() - font.fontHeight) / 2;
+            context.drawText(font, message, textX, textY, textColor, false);
+        }
+
+        @Override
+        public void onPress() {
+            action.run();
+        }
+
+        @Override
+        protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+            appendDefaultNarrations(builder);
+        }
+    }
+
+    private static class GradientButton extends PressableWidget {
+        private final Runnable action;
+
+        GradientButton(int x, int y, int width, int height, Text text, Runnable action) {
+            super(x, y, width, height, text);
+            this.action = action;
+        }
+
+        @Override
+        protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+            int top = this.isHovered() ? COLOR_RESET_TOP_HOVER : COLOR_RESET_TOP;
+            int bottom = this.isHovered() ? COLOR_RESET_BOTTOM_HOVER : COLOR_RESET_BOTTOM;
+            drawRoundedRect(context, getX(), getY(), getWidth(), getHeight(), RESET_BUTTON_RADIUS, COLOR_BUTTON_BORDER);
+            drawRoundedRect(context, getX() + 1, getY() + 1, getWidth() - 2, getHeight() - 2, RESET_BUTTON_RADIUS - 1, bottom);
+            int highlightHeight = (getHeight() - 2) / 2 + RESET_BUTTON_RADIUS;
+            drawRoundedRect(
+                context,
+                getX() + 1,
+                getY() + 1,
+                getWidth() - 2,
+                highlightHeight,
+                RESET_BUTTON_RADIUS - 1,
+                top
+            );
+            TextRenderer font = MinecraftClient.getInstance().textRenderer;
+            Text message = getMessage();
+            int textWidth = font.getWidth(message);
+            int textX = getX() + (getWidth() - textWidth) / 2;
+            int textY = getY() + (getHeight() - font.fontHeight) / 2;
+            context.drawText(font, message, textX, textY, COLOR_TEXT_PRIMARY, false);
         }
 
         @Override
@@ -651,13 +1022,13 @@ public class ViewmodelConfigScreen extends Screen {
 
     private static class AccentButton extends MinimalButton {
         AccentButton(int x, int y, int width, int height, Text text, Runnable action) {
-            super(x, y, width, height, text, action, COLOR_ACCENT, COLOR_ACCENT_HOVER);
+            super(x, y, width, height, text, action, COLOR_BUTTON_CREATE, COLOR_BUTTON_CREATE);
         }
     }
 
     private static class DangerButton extends MinimalButton {
         DangerButton(int x, int y, int width, int height, Text text, Runnable action) {
-            super(x, y, width, height, text.copy().formatted(Formatting.WHITE), action, 0xFF2A1717, 0xFF391F1F);
+            super(x, y, width, height, text.copy().formatted(Formatting.WHITE), action, COLOR_BUTTON_DELETE, COLOR_BUTTON_DELETE);
         }
     }
 
@@ -678,23 +1049,28 @@ public class ViewmodelConfigScreen extends Screen {
         @Override
         protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
             TextRenderer font = MinecraftClient.getInstance().textRenderer;
-            context.drawText(font, label, getX(), getY() + 6, COLOR_TEXT_PRIMARY, false);
+            Text styled = label;
+            float scale = TOGGLE_LABEL_SCALE;
+            int textY = getY() + (getHeight() - Math.round(font.fontHeight * scale)) / 2;
+            context.getMatrices().push();
+            context.getMatrices().scale(scale, scale, 1.0f);
+            context.drawText(font, styled, Math.round(getX() / scale), Math.round(textY / scale), COLOR_TEXT_PRIMARY, false);
+            context.getMatrices().pop();
 
-            int switchWidth = font.getWidth("OFF") + 16;
-            int switchHeight = 16;
-            int switchX = getX() + getWidth() - switchWidth;
+            int switchWidth = TOGGLE_SWITCH_WIDTH;
+            int switchHeight = TOGGLE_HEIGHT;
+            int labelWidth = Math.round(font.getWidth(styled) * scale);
+            int switchX = getX() + labelWidth + TOGGLE_LABEL_GAP;
             int switchY = getY() + (getHeight() - switchHeight) / 2;
             int trackColor = value ? COLOR_ACCENT : COLOR_TOGGLE_OFF;
 
-            context.fill(switchX, switchY, switchX + switchWidth, switchY + switchHeight, trackColor);
-            context.drawBorder(switchX, switchY, switchWidth, switchHeight, COLOR_PANEL_BORDER);
-            int knobX = value ? switchX + switchWidth - switchHeight : switchX;
-            context.fill(knobX, switchY, knobX + switchHeight, switchY + switchHeight, 0xFFEFEFEF);
+            drawRoundedRect(context, switchX, switchY, switchWidth, switchHeight, TOGGLE_HEIGHT / 2, trackColor);
 
-            String state = value ? "ON" : "OFF";
-            int stateWidth = font.getWidth(state);
-            int textX = switchX + (switchWidth - stateWidth) / 2;
-            context.drawText(font, Text.literal(state), textX, switchY + 4, COLOR_TEXT_DARK, false);
+            int knobSize = switchHeight + 4;
+            int knobInset = (knobSize - switchHeight) / 2;
+            int knobX = value ? switchX + switchWidth - knobSize + knobInset : switchX - knobInset;
+            int knobY = switchY - knobInset;
+            drawRoundedRect(context, knobX, knobY, knobSize, knobSize, knobSize / 2, 0xFFF2F2F2);
         }
 
         @Override
@@ -801,37 +1177,53 @@ public class ViewmodelConfigScreen extends Screen {
 
         @Override
         protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-            drawBox(context, getY(), selectedIndex);
-            if (open) {
-                int visible = Math.min(MAX_VISIBLE, entries.size());
-                for (int i = 0; i < visible; i++) {
-                    int idx = scrollOffset + i;
-                    int rowY = getY() + getHeight() * (i + 1);
-                    drawBox(context, rowY, idx);
-                }
+            drawBox(context, getY(), selectedIndex, true);
+        }
+
+        void renderOverlay(DrawContext context) {
+            if (!open) {
+                return;
+            }
+            int visible = Math.min(MAX_VISIBLE, entries.size());
+            int listY = getY() + getHeight();
+            int listHeight = getHeight() * visible;
+            int listX = getX();
+            int listWidth = getWidth();
+            context.fill(listX, listY, listX + listWidth, listY + listHeight, COLOR_BUTTON_BORDER);
+            context.fill(listX + 1, listY + 1, listX + listWidth - 1, listY + listHeight - 1, COLOR_DROPDOWN_BG);
+            for (int i = 0; i < visible; i++) {
+                int idx = scrollOffset + i;
+                int rowY = getY() + getHeight() * (i + 1);
+                drawBox(context, rowY, idx, false);
             }
         }
 
-        private void drawBox(DrawContext context, int y, int index) {
+        private void drawBox(DrawContext context, int y, int index, boolean drawBorder) {
             String label = (index >= 0 && index < entries.size()) ? entries.get(index) : "None";
             boolean isSelected = index == selectedIndex;
-            int background = isSelected ? 0xFF1C1C1C : 0xFF111111;
-            context.fill(getX(), y, getX() + getWidth(), y + getHeight(), background);
-            context.drawBorder(getX(), y, getWidth(), getHeight(), COLOR_PANEL_BORDER);
+            int background = isSelected ? COLOR_DROPDOWN_SELECTED : COLOR_DROPDOWN_BG;
+            if (drawBorder) {
+                drawRoundedRect(context, getX(), y, getWidth(), getHeight(), DROPDOWN_RADIUS, COLOR_BUTTON_BORDER);
+                drawRoundedRect(context, getX() + 1, y + 1, getWidth() - 2, getHeight() - 2, DROPDOWN_RADIUS - 1, background);
+            } else {
+                context.fill(getX(), y, getX() + getWidth(), y + getHeight(), background);
+            }
+            TextRenderer font = MinecraftClient.getInstance().textRenderer;
+            int textY = y + (getHeight() - font.fontHeight) / 2;
             context.drawText(
-                MinecraftClient.getInstance().textRenderer,
+                font,
                 Text.literal(label),
                 getX() + 6,
-                y + 5,
+                textY,
                 COLOR_TEXT_PRIMARY,
                 false
             );
             if (y == getY()) {
                 context.drawText(
-                    MinecraftClient.getInstance().textRenderer,
+                    font,
                     Text.literal("\u25bc"),
                     getX() + getWidth() - 10,
-                    y + 4,
+                    textY,
                     COLOR_ACCENT,
                     false
                 );
