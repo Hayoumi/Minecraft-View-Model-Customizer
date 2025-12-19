@@ -41,5 +41,5 @@ New v2 GUI and CFG system already here 😱
 
 ## 📸 Preview
 
-![Viewmodel Customizer 1.0.0](https://cdn.modrinth.com/data/cached_images/e10d380bdc8361d6abece53d593e7e52a32c330d_0.webp)
+![View Model Customizer 2.1.0](https://cdn.modrinth.com/data/cached_images/9a148b90e4f8bfc5f42a335623390b8c07765b29_0.webp)
 
