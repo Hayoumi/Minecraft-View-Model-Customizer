@@ -1,6 +1,6 @@
 # ViewModel Customizer
 
-![View Model Customizer v3]()
+![View Model Customizer v3](https://github.com/Hayoumi/Minecraft-View-Model-Customizer/blob/166adcaab1962f6a05e64eb259faa8e78abe5354/src/main/resources/javaw_rs75vGoha5.png)
 
 Client-side Fabric mod for adjusting how held items look in first person. Move, rotate and scale the viewmodel, save presets, and tune swing/equip animations without touching the server.
 
