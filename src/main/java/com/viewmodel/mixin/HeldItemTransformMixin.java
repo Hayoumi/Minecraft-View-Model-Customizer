@@ -23,6 +23,9 @@ public abstract class HeldItemTransformMixin {
                                     Hand hand, float swingProgress, ItemStack stack, float equipProgress,
                                     MatrixStack matrices, OrderedRenderCommandQueue queue, int light,
                                     CallbackInfo callback) {
+        // Empty hands are rendered through the same matrix scope; keeping the item offset here
+        // would make the vanilla arm jump forward when the selected hand has no stack.
+        if (stack.isEmpty()) return;
         ViewModelConfig config = ViewModelConfig.current;
         float handSign = hand == Hand.MAIN_HAND ? 1 : -1;
         matrices.translate(config.getPositionX() / 100f * handSign,
