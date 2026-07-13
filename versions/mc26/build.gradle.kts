@@ -1,12 +1,12 @@
 plugins {
-    id("fabric-loom") version "1.14.10"
+    id("net.fabricmc.fabric-loom") version "1.15.5"
 }
 
 version = project.property("mod_version") as String
 group = project.property("maven_group") as String
 
 base {
-    archivesName.set("${project.property("archives_base_name")}-mc${project.property("minecraft_version")}")
+    archivesName.set("${project.property("archives_base_name")}-mc26.1.2")
 }
 
 repositories {
@@ -15,15 +15,14 @@ repositories {
 }
 
 sourceSets.main {
-    java.srcDir("shared/src/main/java")
-    resources.srcDir("shared/src/main/resources")
+    java.srcDir("../../shared/src/main/java")
+    resources.srcDir("../../shared/src/main/resources")
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
-    mappings("net.fabricmc:yarn:${project.property("yarn_mappings")}:v2")
-    modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
+    minecraft("com.mojang:minecraft:26.1.2")
+    implementation("net.fabricmc:fabric-loader:0.19.3")
+    implementation("net.fabricmc.fabric-api:fabric-api:0.154.2+26.1.2")
 
     val lwjglVersion = "3.3.3"
     implementation("org.lwjgl:lwjgl-nanovg:$lwjglVersion")
@@ -45,12 +44,8 @@ tasks.processResources {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
-tasks.withType<JavaCompile>().configureEach { options.release.set(21) }
-
-tasks.jar {
-    from("LICENSE") { rename { "${it}_${project.base.archivesName.get()}" } }
-}
+tasks.withType<JavaCompile>().configureEach { options.release.set(25) }

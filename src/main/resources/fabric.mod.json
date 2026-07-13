@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "id": "viewmodel",
-  "version": "3.2.2",
-  "name": "ViewModel Customizer",
+  "version": "${version}",
+  "name": "View Model Customizer",
   "description": "Customize your viewmodel",
-  "authors": ["Hanqira (Hayoumi)"],
+  "authors": ["shiiu"],
   "contact": {},
   "license": "MIT",
   "environment": "client",
@@ -18,7 +18,7 @@
   ],
   "depends": {
     "fabricloader": ">=0.16.0",
-    "fabric-language-kotlin": ">=1.11.0",
-    "minecraft": "1.21.4"
+    "fabric-api": "*",
+    "minecraft": "1.21.11"
   }
 }

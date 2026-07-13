@@ -87,7 +87,7 @@ public final class ViewModelProfileManager {
         }
         ViewModelProfile active = profiles.get(activeIndex);
         profiles.set(activeIndex, ViewModelProfile.fromConfig(active.name(), ViewModelConfig.current));
-        ViewModelConfig.save();
+        ViewModelConfig.requestSave();
     }
 
     void loadProfiles(List<ViewModelProfile> loadedProfiles, String activeName) {

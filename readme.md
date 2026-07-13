@@ -1,43 +1,58 @@
 # ViewModel Customizer
 
-![View Model Customizer v3](https://eblo.id/uploads/0cLtw5j/javaw_Z7E9ORQ9W3.png)
+![View Model Customizer v3]()
 
-A minimalist Open Source Fabric mod for Minecraft 1.21.4+ that gives you complete control over your first-person viewmodel.
+Client-side Fabric mod for adjusting how held items look in first person. Move, rotate and scale the viewmodel, save presets, and tune swing/equip animations without touching the server.
 
-I'll make a mod for other versions too (prob)!
+## Install
 
-New v3 GUI and CFG system already here 😱
+1. Install [Fabric Loader](https://fabricmc.net/use/installer/) and Fabric API for your Minecraft version.
+2. Download the matching mod jar:
+   - `View Model Customizer-mc1.21.11-3.3.jar` for Minecraft **1.21.11**;
+   - `View Model Customizer-mc26.1.2-3.3.jar` for Minecraft **26.1.2**.
+3. Put it in your instance's `mods` folder and launch the game.
 
-## ✨ Features
+The mod is client-side only; the server does not need to install it.
 
-### 🎮 Full Customization
-- **Position** - Move your viewmodel on X, Y, and Z axes
-- **Rotation** - Adjust Yaw, Pitch, and Roll independently
-- **Scale** - Resize your held items from tiny to massive
+## Use
 
-### 🎯 Animation Control
-- **No Swing** - Prevents your item from visually swinging (keeps rotation animations)
-- **Scale Swing** - Scale swing animations with your custom size
-- **No Equip Animation** - Removing by default the pulling-out animation when switching items
+Press `V` to open the editor. The keybind can be changed in Minecraft's controls.
 
-### ⚙️ Profile system
-- The mod keeps multiple named profiles stored as JSON files in `config/viewmodel/configs/` with the active profile tracked in `config/viewmodel/active.txt`.
-- Every change made in the UI auto-saves to the active profile, preserving your adjustments without extra clicks.
-- Create new profiles, rename them, or delete unused ones directly from the config card.
-- Use the dropdown in the left config card to pick any saved profile instantly.
+- **Size** - changes held-item scale.
+- **Position X / Y / Z** - moves the item; position range is `-100` to `100`.
+- **Yaw / Pitch / Roll** - rotates the item around its own axis.
+- **Reset icon** - resets one setting; **Reset Profile** restores the active profile's defaults.
+- **Profiles** - create, rename, delete and instantly switch between saved setups. Changes are saved automatically.
+- **No Swing** - removes the side movement from the swing animation while keeping the item rotation.
+- **Scale Swing** - makes swing animation respect your item scale.
+- **No Equip** - disables the item draw/equip animation when switching items.
 
-### 🎨 Clean UI
-- Minimalist black & white design
-- Per-setting reset buttons (⟲)
-- Reset all button for convenience
-- Real-time preview while adjusting
+## Features
 
-## 🎮 Usage
+- Clean V3-style NanoVG interface with vector controls and Pixelify Sans.
+- Named profiles with automatic debounced saving.
+- Per-setting and full-profile reset controls.
+- Local-axis item rotation, so Yaw, Pitch and Roll do not throw the item across the screen.
+- Separate builds for Minecraft 1.21.11 and 26.1.2.
 
-- Press `V` to open the ViewModel editor (configurable in keybinds)
-- Adjust sliders to customize your viewmodel
-- Click ⟲ to reset individual settings
-- Click "Reset All" to restore defaults
-- Settings save automatically in real-time
+## Building
 
+The 1.21.11 target uses Java 21 and Yarn mappings:
 
+```powershell
+.\gradlew.bat clean build
+```
+
+The 26.1.2 target is a separate Java 25 project because Minecraft 26.1.2 is unobfuscated and is not binary-compatible with 1.21.11:
+
+```powershell
+.\gradlew.bat -p versions\mc26 clean build
+```
+
+Run the second command with a Java 25 `JAVA_HOME`.
+
+Artifacts are written to `build/libs` and `versions/mc26/build/libs` respectively.
+
+## License
+
+[MIT](LICENSE)

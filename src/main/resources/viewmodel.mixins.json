@@ -4,7 +4,11 @@
   "package": "com.viewmodel.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "HeldItemRendererMixin",
+    "HeldItemTransformMixin",
+    "HeldItemModelTransformMixin",
+    "HeldItemSwingMixin",
+    "HeldItemEquipMixin",
+    "GuiRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

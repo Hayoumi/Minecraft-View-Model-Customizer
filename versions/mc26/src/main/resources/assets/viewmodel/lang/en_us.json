@@ -1,0 +1,14 @@
+{
+  "key.viewmodel.open_menu": "Open ViewModel Menu",
+  "key.categories.viewmodel.controls": "View Model Customizer",
+  "viewmodel.gui.title": "View Model Customizer",
+  "viewmodel.gui.subtitle": "Fine-tune how held items sit in first-person",
+  "viewmodel.gui.scale_swing": "Scale Swing",
+  "viewmodel.gui.no_swing": "No Swing",
+  "viewmodel.gui.no_equip": "No Equip",
+  "viewmodel.gui.configs": "Profiles",
+  "viewmodel.gui.create": "Create",
+  "viewmodel.gui.rename": "Rename",
+  "viewmodel.gui.delete": "Delete",
+  "viewmodel.gui.reset": "Reset Profile"
+}

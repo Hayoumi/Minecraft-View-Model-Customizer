@@ -1,5 +1,6 @@
 {
   "key.category.viewmodel": "View Model Customizer",
+  "key.categories.viewmodel.controls": "View Model Customizer",
   "key.viewmodel.open_menu": "Open ViewModel Menu",
 
   "viewmodel.gui.title": "View Model Customizer",
@@ -13,6 +14,7 @@
   "viewmodel.gui.rotation_roll": "Roll",
   "viewmodel.gui.scale_swing": "Scale Swing",
   "viewmodel.gui.no_swing": "No Swing",
+  "viewmodel.gui.no_equip": "No Equip",
 
   "viewmodel.gui.configs": "Profiles",
   "viewmodel.gui.active_profile": "Active Profile",

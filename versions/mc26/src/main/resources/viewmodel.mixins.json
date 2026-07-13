@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.viewmodel.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "HeldItemTransformMixin",
+    "HeldItemModelTransformMixin",
+    "HeldItemSwingMixin",
+    "HeldItemEquipMixin",
+    "GuiRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -10,7 +10,8 @@ public record ViewModelProfile(
     float rotationPitch,
     float rotationRoll,
     boolean noSwing,
-    boolean scaleSwing
+    boolean scaleSwing,
+    boolean skipEquipAnimation
 ) {
     private static final ViewModelProfile BASELINE = new ViewModelProfile(
         "Default",
@@ -22,7 +23,8 @@ public record ViewModelProfile(
         0.0f,
         0.0f,
         false,
-        false
+        false,
+        true
     );
 
     public static ViewModelProfile baseline() {
@@ -44,7 +46,8 @@ public record ViewModelProfile(
             config.getRotationPitch(),
             config.getRotationRoll(),
             config.getNoSwing(),
-            config.getScaleSwing()
+            config.getScaleSwing(),
+            config.getSkipEquipAnimation()
         );
     }
 
@@ -59,7 +62,8 @@ public record ViewModelProfile(
             rotationPitch,
             rotationRoll,
             noSwing,
-            scaleSwing
+            scaleSwing,
+            skipEquipAnimation
         );
     }
 
@@ -73,5 +77,6 @@ public record ViewModelProfile(
         target.setRotationRoll(rotationRoll);
         target.setNoSwing(noSwing);
         target.setScaleSwing(scaleSwing);
+        target.setSkipEquipAnimation(skipEquipAnimation);
     }
 }
